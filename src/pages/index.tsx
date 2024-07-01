@@ -1,118 +1,355 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { User } from "@instantdb/react";
+import { useRouter } from "next/router";
+import { db } from "@/config";
+import { InstantAuth } from "@/components/InstantAuth";
+import { useDialog, PromptDialog } from "@/components/UI";
 
-const inter = Inter({ subsets: ["latin"] });
+import {
+  createTeamWithMember,
+  acceptInvite,
+  declineInvite,
+  inviteMemberToTeam,
+  createDrawingForTeam,
+  deleteDrawing,
+} from "@/mutators";
 
-export default function Home() {
+import "@/__dev";
+
+export const drawingsPerPage = 5;
+
+export default function Page() {
+  const auth = db.useAuth();
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="mx-auto max-w-md flex flex-col py-4 px-2 gap-3">
+      <a className="font-mono font-bold" href="/">
+        {`<instldraw />`}
+      </a>
+      {auth.isLoading ? (
+        <em>Loading...</em>
+      ) : auth.error ? (
+        <strong>Oops, an error occurred!</strong>
+      ) : !auth.user ? (
+        <InstantAuth />
+      ) : (
+        <Index user={auth.user} />
+      )}
+    </div>
+  );
+}
+
+function Index({ user }: { user: User }) {
+  const teamDialog = useDialog();
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const result = db.useQuery({
+    teams: {
+      $: {
+        where: {
+          "memberships.userId": user.id,
+        },
+      },
+    },
+    invites: {
+      $: {
+        where: {
+          userEmail: user.email,
+        },
+      },
+      teams: {},
+    },
+  });
+
+  const { invites, teams } = result.data ?? {};
+
+  const team = useMemo(() => {
+    return selectedTeamId
+      ? teams?.find((t) => t.id === selectedTeamId)
+      : undefined;
+  }, [selectedTeamId, teams]);
+
+  const pendingInvites = useMemo(() => {
+    const teamIds = new Set(teams?.map((t) => t.id) ?? []);
+    return invites?.filter((invite) => !teamIds.has(invite.teamId)) ?? [];
+  }, [invites, teams]);
+
+  useEffect(() => {
+    if (team && teams?.find((t) => t.id === team.id)) return;
+
+    const firstTeam = teams?.at(0);
+    if (!firstTeam) return;
+
+    setSelectedTeamId(firstTeam.id);
+  }, [teams]);
+
+  return (
+    <div>
+      {teamDialog.isOpen ? (
+        <PromptDialog
+          title="Team name"
+          onClose={teamDialog.close}
+          onSubmit={async (teamName) => {
+            const response = await createTeamWithMember({
+              teamName,
+              userEmail: user.email,
+              userId: user.id,
+            });
+
+            setSelectedTeamId(response.vars.teamId);
+          }}
+        />
+      ) : null}
+      {result.isLoading ? (
+        <em>Loading...</em>
+      ) : result.error ? (
+        <strong>Oops, an error occurred!</strong>
+      ) : result.data.teams.length === 0 && result.data.invites.length === 0 ? (
+        <div className="flex flex-col gap-2">
+          <h2 className="font-bold text-xl">Welcome!</h2>
+          <p>Create your first team to get started.</p>
+          <button
+            className="bg-black text-white py-0.5 px-3 rounded text-sm"
+            onClick={teamDialog.open}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            Let's go!
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {pendingInvites.length ? (
+            <div className="flex flex-col gap-1 text-gray-600 bg-gray-50 rounded border py-2 px-3">
+              <h2 className="font-bold">Team invites</h2>
+              {pendingInvites.map((invite) => {
+                return (
+                  <div key={invite.id} className="flex gap-2">
+                    {invite.teamName}
+                    <button
+                      className="bg-black text-white py-0.5 px-3 rounded text-sm"
+                      onClick={async () => {
+                        acceptInvite({
+                          teamId: invite.teamId,
+                          userEmail: user.email,
+                          userId: user.id,
+                        });
+                      }}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="bg-black text-white py-0.5 px-3 rounded text-sm"
+                      onClick={async () => {
+                        declineInvite({ inviteId: invite.id });
+                      }}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <label>Teams</label>
+              <select
+                className="flex-1 border py-0"
+                value={selectedTeamId ?? undefined}
+                onChange={(e) => setSelectedTeamId(e.target.value ?? null)}
+              >
+                {result.data?.teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="bg-black text-white py-0.5 px-3 rounded text-sm"
+                onClick={teamDialog.open}
+              >
+                New team
+              </button>
+            </div>
+            {team ? <Team team={team} /> : null}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Team({
+  team,
+}: {
+  team: {
+    id: string;
+    name: string;
+  };
+}) {
+  const router = useRouter();
+  const [pageNumber, setPageNumber] = useState(1);
+  const inviteMemberDialog = useDialog();
+  const newDrawingDialog = useDialog();
+
+  const { isLoading, error, data } = db.useQuery({
+    drawings: {
+      $: {
+        where: {
+          "team.id": team.id,
+        },
+        limit: drawingsPerPage,
+        offset: drawingsPerPage * (pageNumber - 1),
+      },
+    },
+    memberships: {
+      $: {
+        where: {
+          "team.id": team.id,
+        },
+      },
+    },
+  });
+
+  const drawings = data?.drawings ?? [];
+  const memberships = data?.memberships ?? [];
+
+  // begin: pagination
+  // hack to check if there is a next page
+  // by fetching one more item than the page size
+  // if there is a next page, we will enable a "next" button
+  // in the future, useQuery should give us a way to check if there is a next page
+  const _pageLookaheadQuery = db.useQuery({
+    drawings: {
+      $: {
+        where: {
+          "team.id": team.id,
+        },
+        limit: drawingsPerPage + 1,
+        offset: drawingsPerPage * (pageNumber - 1),
+      },
+    },
+  });
+
+  const hasNextPage =
+    data &&
+    _pageLookaheadQuery.data &&
+    _pageLookaheadQuery.data?.drawings.length > drawings.length;
+
+  const loadNextPage = () => {
+    if (!hasNextPage) return;
+    setPageNumber(pageNumber + 1);
+  };
+
+  const loadPreviousPage = () => {
+    if (pageNumber <= 1) return;
+    setPageNumber(pageNumber - 1);
+  };
+  // end: pagination
+
+  return (
+    <div>
+      {inviteMemberDialog.isOpen ? (
+        <PromptDialog
+          title="User's email address"
+          onClose={inviteMemberDialog.close}
+          onSubmit={(userEmail) => {
+            inviteMemberToTeam({
+              teamId: team.id,
+              userEmail,
+              teamName: team.name,
+            });
+          }}
+        />
+      ) : null}
+      {newDrawingDialog.isOpen ? (
+        <PromptDialog
+          title="Drawing name"
+          onClose={newDrawingDialog.close}
+          onSubmit={async (drawingName) => {
+            const response = await createDrawingForTeam({
+              teamId: team.id,
+              drawingName,
+            });
+
+            await router.push(`/drawings/${response.vars.drawingId}`);
+          }}
+        />
+      ) : null}
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <button
+            className="bg-black text-white py-0.5 px-3 rounded text-sm"
+            onClick={newDrawingDialog.open}
+          >
+            New drawing
+          </button>
+          <button
+            className="bg-black text-white py-0.5 px-3 rounded text-sm"
+            onClick={inviteMemberDialog.open}
+          >
+            Invite team member
+          </button>
+        </div>
+        <h3 className="font-bold">Drawings</h3>
+        <div>
+          {isLoading ? (
+            <em>Loading...</em>
+          ) : error ? (
+            <em>Failed to load drawings</em>
+          ) : drawings.length ? (
+            <div>
+              {drawings.map((drawing) => (
+                <div
+                  key={drawing.id}
+                  className="flex gap-0.5 justify-between hover:bg-gray-100 py-1"
+                >
+                  <Link
+                    key={drawing.id}
+                    href={`/drawings/${drawing.id}`}
+                    className="cursor-pointer flex-1"
+                  >
+                    {drawing.name}
+                  </Link>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteDrawing({ drawingId: drawing.id });
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <em className="text-sm">No drawings</em>
+          )}
+        </div>
+        <div className="items-end flex gap-2 text-lg">
+          <button
+            className="disabled:text-gray-300"
+            disabled={pageNumber === 1}
+            onClick={loadPreviousPage}
+          >
+            ←
+          </button>
+          <button
+            className="disabled:text-gray-300"
+            disabled={!hasNextPage}
+            onClick={loadNextPage}
+          >
+            →
+          </button>
+        </div>
+        <div className="flex flex-col text-sm text-gray-600 bg-gray-50 rounded border py-2 px-3">
+          <div className="font-bold">Members</div>
+          {memberships.map((m) => (
+            <div className="" key={m.id}>
+              {m.userEmail}
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
