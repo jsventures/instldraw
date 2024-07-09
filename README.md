@@ -155,6 +155,7 @@ Instant provides a [permissions layer](https://www.instantdb.com/docs/permission
 
 - `data` is a variable provided by Instant that references the object being operated upon.
 - `auth` is a variable provided by Instant that you can use to access the current user's ID and email.
-- You can leverage Instant's graph database in your rule definitions using `data.ref(<key_path>)`! `ref` will traverse an entity's links and collect the values of your specified property path.
-  - For example, `teams.bind:isMember` above uses `data.ref('memberships.userId')` to collect all linked memberships for a given team, then select the `userId` property for each membership.
-- You can use the `bind` param to define abstractions (`isMember`, `isInvitee`) that can be re-used across rules.
+- You can leverage Instant's graph database in your rule definitions using `data.ref(<key_path>)`.
+  - `ref` will traverse an entity's links and collect the values of your specified property path.
+  - For example, `isMember` under `bind` for `teams` uses `data.ref('memberships.userId')` to 1) collect all linked memberships for a given team and then 2) select the `userId` property for each membership.
+- You can use the `bind` param to define abstractions (`isMember`, `isInvitee`) that can be re-used across rules for that namespace.
