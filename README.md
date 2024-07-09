@@ -1,6 +1,6 @@
-# 🎨 [instldraw](https://draw.instantdb.com/): Multiplayer Drawings with Instant 🤝 tldraw
+# 🎨 [instldraw](https://draw.instantdb.com/): Team-oriented tldraw built w/ InstantDB
 
-Welcome! We took [tldraw](https://tldraw.dev/)'s infinite canvas and added real-time team collaboration powered by Instant's [graph database](https://www.instantdb.com/docs/instaml) and [presence](https://www.instantdb.com/docs/presence-and-topics). If you’re curious, check out [this essay](https://www.instantdb.com/essays/next_firebase) to learn more about “why Instant”.
+Welcome! We took [tldraw](https://tldraw.dev/)'s infinite canvas and added real-time team collaboration powered by Instant's [graph database](https://www.instantdb.com/docs/instaml) and [presence](https://www.instantdb.com/docs/presence-and-topics).
 
 https://github.com/jsventures/instldraw/assets/1624703/bde87c77-10b5-4267-9c82-20ac6755fabc
 
@@ -159,3 +159,6 @@ Instant provides a [permissions layer](https://www.instantdb.com/docs/permission
   - `ref` will traverse an entity's links and collect the values of your specified property path.
   - For example, `isMember` under `bind` for `teams` uses `data.ref('memberships.userId')` to 1) collect all linked memberships for a given team and then 2) select the `userId` property for each membership.
 - You can use the `bind` param to define abstractions (`isMember`, `isInvitee`) that can be re-used across rules for that namespace.
+
+## Why Instant?
+Instant is a sync engine inspired by Firebase with support for relational data. To learn more, check out [this essay](https://www.instantdb.com/essays/next_firebase).
