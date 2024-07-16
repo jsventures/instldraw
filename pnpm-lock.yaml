@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@instantdb/react':
-    specifier: ^0.10.27
-    version: 0.10.27(react@18.3.1)
+    specifier: ^0.10.32
+    version: 0.10.32(react@18.3.1)
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -89,20 +89,20 @@ packages:
     resolution: {integrity: sha512-dWO2pw8hhi+WrXq1YJy2yCuWoL20PddgGaqTgVe4cOS9Q6qklXCiA1tJEqX6BEwRNSCP84/afac9hd4MS+zEUA==}
     dev: false
 
-  /@instantdb/core@0.10.27:
-    resolution: {integrity: sha512-M04kWBfSNBgn5vvmkmwAcsfiR6Cd+Rafn0TERuDfC9tSulwx5+cHdAwww9F0y4ZPf5rOi6aPuTa4YcOolUL1gw==}
+  /@instantdb/core@0.10.32:
+    resolution: {integrity: sha512-8+tzpdidPMhs2W8yp5P73X+MM83YSufaWFbsiUUl1ZudfZVEDIMxZ3WBm9ESzvWcWv2IhAORUgaeTXWtOwHtYQ==}
     dependencies:
       immer: 9.0.14
       object-hash: 3.0.0
       uuid: 9.0.1
     dev: false
 
-  /@instantdb/react@0.10.27(react@18.3.1):
-    resolution: {integrity: sha512-qBs6MVR5ZLODUiLqm9GpIuLFnF7hb7VfHjHn0h2DatGQ8rml5JoQodxSzm4QhiIla6XXCkkjHONYPEsykcvhNg==}
+  /@instantdb/react@0.10.32(react@18.3.1):
+    resolution: {integrity: sha512-k0JQw7XRLF1F4pVj5YLN4iu7CdR/kZnICwgrQDIqUYFUi1w0B8bX4o9sH76Ap6SYh0hFTAJZXZiWMCdXeb4A3A==}
     peerDependencies:
       react: '>=16'
     dependencies:
-      '@instantdb/core': 0.10.27
+      '@instantdb/core': 0.10.32
       react: 18.3.1
     dev: false
 
