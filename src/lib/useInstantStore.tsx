@@ -31,7 +31,6 @@ export function useInstantStore({
   useEffect(() => {
     if (!drawingId) return;
     const _drawingId = drawingId;
-    let lastState: DrawingState = {};
 
     // --- begin: throttling
     // We can set a throttle wait time by adding `?x_throttle=100` to the URL
@@ -83,13 +82,7 @@ export function useInstantStore({
         if (lifecycleState === "pending") {
           initDrawing(state);
         } else if (lifecycleState === "ready") {
-          syncInstantStateToTldrawStore(
-            tlStore,
-            state,
-            lastState,
-            localSourceId
-          );
-          lastState = state;
+          syncInstantStateToTldrawStore(tlStore, state, localSourceId);
         }
       }
     );
@@ -112,7 +105,10 @@ export function useInstantStore({
       tlStore.mergeRemoteChanges(() => {
         loadSnapshot(tlStore, {
           document: {
-            store: omitBy(state, (v) => v === null) as Record<string, TLRecord>,
+            store: omitBy(state, (v) => v === null || v.meta.deleted) as Record<
+              string,
+              TLRecord
+            >,
             schema: createTLSchema().serialize(),
           },
         });
@@ -163,8 +159,15 @@ function tldrawEventToStateSlice(
     };
   }
 
-  for (const id of Object.keys(event.changes.removed)) {
-    state[id] = null;
+  for (const item of Object.values(event.changes.removed)) {
+    state[item.id] = {
+      ...item,
+      meta: {
+        source: localSourceId,
+        version: uniqueId(),
+        deleted: true,
+      },
+    };
   }
 
   return state;
@@ -173,19 +176,19 @@ function tldrawEventToStateSlice(
 function syncInstantStateToTldrawStore(
   store: TLStore,
   state: DrawingState,
-  lastState: DrawingState,
   localSourceId: string
 ) {
   // Calling `put` or `remove` on the store would trigger our `handleLocalChange` listener.
   // TLDraw offers a handy `mergeRemoteChanges` method to apply changes without triggering listeners,
   // allowing us to avoid an infinite loop of syncing changes back and forth. :)
   store.mergeRemoteChanges(() => {
-    const ids = new Set(Object.keys(state));
-    const removeIds = Object.keys(lastState).filter((id) => !ids.has(id));
+    const removeIds = Object.values(state)
+      .filter((e) => e?.meta.deleted && store.has(e.id))
+      .map((e) => e!.id);
 
     const updates = Object.values(state).filter((item) => {
-      // filter out removals
       if (!item) return false;
+      if (item.meta.deleted) return false;
 
       const tlItem = store.get(item?.id as TLShapeId);
       // We add a unique id to each version of an item to avoid updating it with the same data
