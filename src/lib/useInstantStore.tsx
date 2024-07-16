@@ -37,10 +37,10 @@ export function useInstantStore({
     // We default to 200ms
     // Setting `x_throttle=0` will bypass throttling
     let pendingState: DrawingState = {};
-    const throttleWaitMs =
-      parseInt(String(new URL(location.href).searchParams.get("x_throttle"))) ||
-      200;
-
+    const sp = new URL(location.href).searchParams;
+    const throttleWaitMs = sp.has("x_throttle")
+      ? parseInt(String(sp.get("x_throttle"))) || 0
+      : 200;
     const enqueueSync = throttleWaitMs
       ? throttle(runSync, throttleWaitMs, {
           leading: true,
