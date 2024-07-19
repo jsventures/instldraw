@@ -13,7 +13,7 @@ export async function createDrawingForTeam({
 
   const result = await db.transact([
     tx.drawings[drawingId].merge({ name: drawingName ?? "Untitled" }),
-    tx.drawings[drawingId].link({ team: teamId }),
+    tx.drawings[drawingId].link({ teams: teamId }),
     tx.teams[teamId].link({ drawings: drawingId }),
   ]);
 
@@ -35,7 +35,7 @@ export async function createTeamWithMember({
   const result = await db.transact([
     tx.teams[teamId].update({ name: teamName, creatorId: userId }),
     tx.memberships[membershipId].update({ teamId, userId, userEmail }),
-    tx.memberships[membershipId].link({ team: teamId }),
+    tx.memberships[membershipId].link({ teams: teamId }),
   ]);
 
   return {
@@ -60,7 +60,7 @@ export async function inviteMemberToTeam({
 
   const result = await db.transact([
     tx.invites[inviteId].update({ userEmail, teamId, teamName }),
-    tx.invites[inviteId].link({ team: teamId }),
+    tx.invites[inviteId].link({ teams: teamId }),
   ]);
 
   return {
@@ -82,7 +82,7 @@ export async function acceptInvite({
 
   const result = await db.transact([
     tx.memberships[membershipId].update({ teamId, userId, userEmail }),
-    tx.memberships[membershipId].link({ team: teamId }),
+    tx.memberships[membershipId].link({ teams: teamId }),
   ]);
 
   return {

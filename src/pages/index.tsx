@@ -195,7 +195,7 @@ function Team({
     drawings: {
       $: {
         where: {
-          "team.id": team.id,
+          "teams.id": team.id,
         },
         limit: drawingsPerPage,
         offset: drawingsPerPage * (pageNumber - 1),
@@ -204,7 +204,7 @@ function Team({
     memberships: {
       $: {
         where: {
-          "team.id": team.id,
+          "teams.id": team.id,
         },
       },
     },
@@ -222,7 +222,7 @@ function Team({
     drawings: {
       $: {
         where: {
-          "team.id": team.id,
+          "teams.id": team.id,
         },
         limit: drawingsPerPage + 1,
         offset: drawingsPerPage * (pageNumber - 1),

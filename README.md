@@ -114,7 +114,7 @@ Instant provides a [permissions layer](https://www.instantdb.com/docs/permission
   "invites": {
     "bind": [
       "isMember",
-      "auth.id in data.ref('team.memberships.userId')",
+      "auth.id in data.ref('teams.memberships.userId')",
       "isInvitee",
       "auth.email == data.userEmail"
     ],
@@ -126,7 +126,10 @@ Instant provides a [permissions layer](https://www.instantdb.com/docs/permission
     }
   },
   "drawings": {
-    "bind": ["isMember", "auth.id in data.ref('team.memberships.userId')"],
+    "bind": [
+      "isMember",
+      "auth.id in data.ref('teams.memberships.userId')"
+    ],
     "allow": {
       "view": "isMember",
       "create": "isMember",
@@ -137,9 +140,9 @@ Instant provides a [permissions layer](https://www.instantdb.com/docs/permission
   "memberships": {
     "bind": [
       "isMember",
-      "auth.id in data.ref('team.memberships.userId')",
+      "auth.id in data.ref('teams.memberships.userId')",
       "isInviteeOrCreator",
-      "size(data.ref('team.invites.id')) == 0 ? auth.id in data.ref('team.creatorId') : auth.email in data.ref('team.invites.userEmail')",
+      "size(data.ref('teams.invites.id')) == 0 ? auth.id in data.ref('teams.creatorId') : auth.email in data.ref('teams.invites.userEmail')",
       "isUser",
       "auth.id == data.userId"
     ],
