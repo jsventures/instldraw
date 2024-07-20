@@ -63,7 +63,7 @@ Both pages load data from Instant with `db.useQuery` and write data using functi
 
 ```graphql
 drawings {
-  team: @has_one(teams)
+  teams: @has_one(teams)
   state: DrawingState{} # see src/types.ts
   name: string
 }
@@ -77,14 +77,14 @@ teams {
 }
 
 invites {
-  team: @has_one(teams)
+  teams: @has_one(teams)
   teamId: string
   teamName: string
   userEmail: string
 }
 
 memberships {
-  team: @has_one(teams)
+  teams: @has_one(teams)
   teamId: string
   userId: string
   userEmail: string
