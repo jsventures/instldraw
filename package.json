@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@instantdb/react": "^0.10.32",
+    "@instantdb/react": "^0.12.13",
     "lodash": "^4.17.21",
     "next": "14.2.4",
     "react": "^18",
