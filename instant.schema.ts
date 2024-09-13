@@ -6,22 +6,22 @@ const graph = i.graph(
   process.env.NEXT_PUBLIC_INSTANT_APP_ID!,
   {
     drawings: i.entity({
-      name: i.any(),
-      state: i.any(),
+      name: i.string(),
+      state: i.json(),
     }),
     invites: i.entity({
-      teamId: i.any(),
-      teamName: i.any(),
-      userEmail: i.any(),
+      teamId: i.string(),
+      teamName: i.string(),
+      userEmail: i.string(),
     }),
     memberships: i.entity({
-      teamId: i.any(),
-      userEmail: i.any(),
-      userId: i.any(),
+      teamId: i.string(),
+      userEmail: i.string(),
+      userId: i.string(),
     }),
     teams: i.entity({
-      creatorId: i.any(),
-      name: i.any(),
+      creatorId: i.string(),
+      name: i.string(),
     }),
   },
   {
