@@ -56,8 +56,7 @@ function Index({ user }: { user: User }) {
         where: {
           userEmail: user.email,
         },
-      },
-      teams: {},
+      }
     },
   });
 
