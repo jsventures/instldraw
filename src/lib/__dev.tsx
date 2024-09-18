@@ -1,5 +1,5 @@
 import { tx } from "@instantdb/react";
-import { db, isBrowser, isDev } from "@/config";
+import { db, isBrowser, isDev } from "@/lib/config";
 
 // auth dev utils
 

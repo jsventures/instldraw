@@ -1,4 +1,4 @@
-import schema from "../instant.schema"
+import schema from "../../instant.schema"
 import { init_experimental } from "@instantdb/react";
 import { TLInstancePresence, uniqueId } from "tldraw";
 

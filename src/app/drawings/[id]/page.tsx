@@ -1,18 +1,20 @@
+"use client";
 import "tldraw/tldraw.css";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Tldraw, useEditor } from "tldraw";
 
-import { updateDrawingName } from "@/mutators";
+import { updateDrawingName } from "@/lib/mutators";
 import { useInstantStore } from "@/lib/useInstantStore";
 import { useInstantPresence } from "@/lib/useInstantPresence";
-import { db, colorNames, localSourceId } from "@/config";
+import { db, colorNames, localSourceId } from "@/lib/config";
 
-export default function Page() {
+export default function Page({ params }: { params: { id: string } }) {
+
   const auth = db.useAuth();
 
   const router = useRouter();
-  const drawingId = router.query.id as string;
+  const drawingId = params.id as string;
 
   useEffect(() => {
     if (auth.isLoading) return;

@@ -1,6 +1,6 @@
-import type { DrawingState } from "@/types";
+import type { DrawingState } from "@/lib/instant/types";
 import { id, tx } from "@instantdb/react";
-import { db } from "@/config";
+import { db } from "@/lib/config";
 
 export async function createDrawingForTeam({
   teamId,

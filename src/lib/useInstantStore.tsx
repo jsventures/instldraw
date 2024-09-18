@@ -13,9 +13,9 @@ import {
   TLStore,
 } from "tldraw";
 
-import type { DrawingState } from "@/types";
-import { db } from "@/config";
-import { updateDrawingState } from "@/mutators";
+import type { DrawingState } from "@/lib/instant/types";
+import { db } from "@/lib/config";
+import { updateDrawingState } from "@/lib/mutators";
 
 export function useInstantStore({
   drawingId,
