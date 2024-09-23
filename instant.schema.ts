@@ -3,7 +3,6 @@ import "dotenv/config";
 import { i } from "@instantdb/react";
 
 const graph = i.graph(
-  process.env.NEXT_PUBLIC_INSTANT_APP_ID!,
   {
     drawings: i.entity({
       name: i.string(),
