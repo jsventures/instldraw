@@ -53,7 +53,7 @@ Both pages load data from Instant with `db.useQuery` and write data using functi
 
 ### 📄 Notable Files
 
-- 'instant.schema.ts`: Contains the schema for the app's data model.
+- `instant.schema.ts`: Contains the schema for the app's data model.
 - `instant.perms.ts`: Contains the permissions for the app.
 - `src/pages/index.tsx`: The main dashboard: list and manage teams, teammates, and drawings.
 - `src/pages/drawings/[id].tsx`: The canvas! Uses `useInstantStore` and `useInstantPresence` to add multiplayer.
