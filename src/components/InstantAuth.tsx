@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { db } from "@/config";
+import { db } from "@/lib/config";
 
 // Instant auth copypasta https://www.instantdb.com/docs/auth#magic-codes
 

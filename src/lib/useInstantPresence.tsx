@@ -1,4 +1,4 @@
-import { db } from "@/config";
+import { db } from "@/lib/config";
 import { useEffect, useRef } from "react";
 import {
   atom,
