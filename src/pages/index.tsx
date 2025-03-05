@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { User } from "@instantdb/react";
 import { useRouter } from "next/router";
-import { db } from "@/config";
+import clientDB from "@/lib/clientDB";
 import { InstantAuth } from "@/components/InstantAuth";
 import { useDialog, PromptDialog } from "@/components/UI";
 
@@ -20,7 +20,7 @@ import "@/__dev";
 export const drawingsPerPage = 5;
 
 export default function Page() {
-  const auth = db.useAuth();
+  const auth = clientDB.useAuth();
 
   return (
     <div className="mx-auto max-w-md flex flex-col py-4 px-2 gap-3">
@@ -43,7 +43,7 @@ export default function Page() {
 function Index({ user }: { user: User }) {
   const teamDialog = useDialog();
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const result = db.useQuery({
+  const result = clientDB.useQuery({
     teams: {
       $: {
         where: {
@@ -56,7 +56,7 @@ function Index({ user }: { user: User }) {
         where: {
           userEmail: user.email,
         },
-      }
+      },
     },
   });
 
@@ -190,7 +190,7 @@ function Team({
   const inviteMemberDialog = useDialog();
   const newDrawingDialog = useDialog();
 
-  const { isLoading, error, data } = db.useQuery({
+  const { isLoading, error, data } = clientDB.useQuery({
     drawings: {
       $: {
         where: {
@@ -217,7 +217,7 @@ function Team({
   // by fetching one more item than the page size
   // if there is a next page, we will enable a "next" button
   // in the future, useQuery should give us a way to check if there is a next page
-  const _pageLookaheadQuery = db.useQuery({
+  const _pageLookaheadQuery = clientDB.useQuery({
     drawings: {
       $: {
         where: {

@@ -14,7 +14,7 @@ import {
 } from "tldraw";
 
 import type { DrawingState } from "@/types";
-import { db } from "@/config";
+import clientDB from "./clientDB";
 import { updateDrawingState } from "@/mutators";
 
 export function useInstantStore({
@@ -65,7 +65,7 @@ export function useInstantStore({
       shapeUtils: [...defaultShapeUtils],
     });
 
-    db._core.subscribeQuery(
+    clientDB._core.subscribeQuery(
       {
         drawings: {
           $: {

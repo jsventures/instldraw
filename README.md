@@ -14,7 +14,7 @@ https://github.com/jsventures/instldraw/assets/1624703/bde87c77-10b5-4267-9c82-2
 
 ### ⚡ 1. Create a free account on [Instant](https://www.instantdb.com/)
 
-Head on over to the [Instant dashboard](https://www.instantdb.com/dash), grab your app's ID, and plop it into a `.env.development.local` file:
+Head on over to the [Instant dashboard](https://www.instantdb.com/dash), grab your app's ID, and plop it into a `.env` file:
 
 ```bash
 NEXT_PUBLIC_INSTANT_APP_ID=__YOUR_APP_ID__
@@ -53,13 +53,15 @@ Both pages load data from Instant with `db.useQuery` and write data using functi
 
 ### 📄 Notable Files
 
-- `instant.schema.ts`: Contains the schema for the app's data model.
-- `instant.perms.ts`: Contains the permissions for the app.
+- `src/instant.schema.ts`: Contains the schema for the app's data model.
+- `src/instant.perms.ts`: Contains the permissions for the app.
 - `src/pages/index.tsx`: The main dashboard: list and manage teams, teammates, and drawings.
 - `src/pages/drawings/[id].tsx`: The canvas! Uses `useInstantStore` and `useInstantPresence` to add multiplayer.
+- `src/lib/clientDB.tsx`: Exports our Instant database!
 - `src/lib/useInstantStore.tsx`: A collaborative backend for tldraw built on top of Instant's real-time database. Uses InstaML's [merge()](https://www.instantdb.com/docs/instaml#merge) for fine-grained updates to the drawing state.
 - `src/lib/useInstantPresence.tsx`: A React hook responsible for keeping tldraw's editor state in sync with [Instant's real-time presence API](https://www.instantdb.com/docs/presence-and-topics).
 - `src/mutators.ts`: All functions that update Instant's database live here. You can inspect and edit your database using the [Instant Explorer](https://www.instantdb.com/dash?s=main&t=explorer).
 
 ## Why Instant?
+
 Instant is a sync engine inspired by Firebase with support for relational data. To learn more, check out [this essay](https://www.instantdb.com/essays/next_firebase).

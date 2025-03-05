@@ -1,4 +1,5 @@
-import { db } from "@/config";
+import clientDB from "@/lib/clientDB";
+
 import { useEffect, useRef } from "react";
 import {
   atom,
@@ -18,7 +19,7 @@ export function useInstantPresence({
   drawingId: string;
   user: { id: string; color: string; name: string };
 }) {
-  const room = db.room("drawings", drawingId);
+  const room = clientDB.room("drawings", drawingId);
   const presence = room.usePresence();
   const prevPeersRef = useRef<Record<string, { tldraw: TLInstancePresence }>>(
     {}
