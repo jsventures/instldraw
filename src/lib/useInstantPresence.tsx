@@ -20,7 +20,7 @@ export function useInstantPresence({
   user: { id: string; color: string; name: string };
 }) {
   const room = clientDB.room("drawings", drawingId);
-  const presence = room.usePresence();
+  const presence = clientDB.rooms.usePresence(room);
   const prevPeersRef = useRef<Record<string, { tldraw: TLInstancePresence }>>(
     {}
   );
