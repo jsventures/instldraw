@@ -3,11 +3,6 @@ import clientDB from "@/lib/clientDB";
 
 // Instant auth copypasta https://www.instantdb.com/docs/auth#magic-codes
 
-import { User } from "@instantdb/react";
-
-// ID for app: instantgram
-const APP_ID = "5a7a526e-954a-47c1-ab85-e57cdf1ea773";
-
 export function InstantAuth() {
   const [sentEmail, setSentEmail] = useState("");
 
