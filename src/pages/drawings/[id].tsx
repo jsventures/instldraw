@@ -6,10 +6,11 @@ import { Tldraw, useEditor } from "tldraw";
 import { updateDrawingName } from "@/mutators";
 import { useInstantStore } from "@/lib/useInstantStore";
 import { useInstantPresence } from "@/lib/useInstantPresence";
-import { db, colorNames, localSourceId } from "@/config";
+import { colorNames, localSourceId } from "@/config";
+import clientDB from "@/lib/clientDB";
 
 export default function Page() {
-  const auth = db.useAuth();
+  const auth = clientDB.useAuth();
 
   const router = useRouter();
   const drawingId = router.query.id as string;
@@ -39,7 +40,7 @@ function InstantTldraw({ drawingId }: { drawingId: string }) {
   const [displayName, setDisplayName] = useState<string>("");
   const [color, setColor] = useState<string>("blue");
 
-  const { data, isLoading: isDrawingLoading } = db.useQuery({
+  const { data, isLoading: isDrawingLoading } = clientDB.useQuery({
     drawings: {
       $: {
         where: {

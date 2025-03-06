@@ -1,9 +1,8 @@
-import "dotenv/config";
-
 import { i } from "@instantdb/react";
+import { TLInstancePresence } from "tldraw";
 
-const graph = i.graph(
-  {
+const schema = i.schema({
+  entities: {
     drawings: i.entity({
       name: i.string(),
       state: i.json(),
@@ -23,7 +22,7 @@ const graph = i.graph(
       name: i.string(),
     }),
   },
-  {
+  links: {
     drawingsTeams: {
       forward: {
         on: "drawings",
@@ -60,7 +59,14 @@ const graph = i.graph(
         label: "memberships",
       },
     },
-  }
-);
+  },
+  rooms: {
+    drawings: {
+      presence: i.entity({
+        tldraw: i.json<TLInstancePresence>(),
+      }),
+    },
+  },
+});
 
-export default graph;
+export default schema;

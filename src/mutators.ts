@@ -1,6 +1,6 @@
 import type { DrawingState } from "@/types";
-import { id, tx } from "@instantdb/react";
-import { db } from "@/config";
+import { id } from "@instantdb/react";
+import clientDB from "@/lib/clientDB";
 
 export async function createDrawingForTeam({
   teamId,
@@ -11,10 +11,10 @@ export async function createDrawingForTeam({
 }) {
   const drawingId = id();
 
-  const result = await db.transact([
-    tx.drawings[drawingId].merge({ name: drawingName ?? "Untitled" }),
-    tx.drawings[drawingId].link({ teams: teamId }),
-    tx.teams[teamId].link({ drawings: drawingId }),
+  const result = await clientDB.transact([
+    clientDB.tx.drawings[drawingId].merge({ name: drawingName ?? "Untitled" }),
+    clientDB.tx.drawings[drawingId].link({ teams: teamId }),
+    clientDB.tx.teams[teamId].link({ drawings: drawingId }),
   ]);
 
   return { result, vars: { drawingId } };
@@ -32,10 +32,10 @@ export async function createTeamWithMember({
   const teamId = id();
   const membershipId = id();
 
-  const result = await db.transact([
-    tx.teams[teamId].update({ name: teamName, creatorId: userId }),
-    tx.memberships[membershipId].update({ teamId, userId, userEmail }),
-    tx.memberships[membershipId].link({ teams: teamId }),
+  const result = await clientDB.transact([
+    clientDB.tx.teams[teamId].update({ name: teamName, creatorId: userId }),
+    clientDB.tx.memberships[membershipId].update({ teamId, userId, userEmail }),
+    clientDB.tx.memberships[membershipId].link({ teams: teamId }),
   ]);
 
   return {
@@ -58,9 +58,9 @@ export async function inviteMemberToTeam({
 }) {
   const inviteId = id();
 
-  const result = await db.transact([
-    tx.invites[inviteId].update({ userEmail, teamId, teamName }),
-    tx.invites[inviteId].link({ teams: teamId }),
+  const result = await clientDB.transact([
+    clientDB.tx.invites[inviteId].update({ userEmail, teamId, teamName }),
+    clientDB.tx.invites[inviteId].link({ teams: teamId }),
   ]);
 
   return {
@@ -80,9 +80,9 @@ export async function acceptInvite({
 }) {
   const membershipId = id();
 
-  const result = await db.transact([
-    tx.memberships[membershipId].update({ teamId, userId, userEmail }),
-    tx.memberships[membershipId].link({ teams: teamId }),
+  const result = await clientDB.transact([
+    clientDB.tx.memberships[membershipId].update({ teamId, userId, userEmail }),
+    clientDB.tx.memberships[membershipId].link({ teams: teamId }),
   ]);
 
   return {
@@ -90,8 +90,8 @@ export async function acceptInvite({
   };
 }
 export async function declineInvite({ inviteId }: { inviteId: string }) {
-  const result = await db.transact([
-    tx.invites[inviteId].merge({ status: "declined" }),
+  const result = await clientDB.transact([
+    clientDB.tx.invites[inviteId].merge({ status: "declined" }),
   ]);
 
   return {
@@ -106,7 +106,7 @@ export function updateDrawingState({
   drawingId: string;
   state: DrawingState;
 }) {
-  return db.transact(tx.drawings[drawingId].merge({ state }));
+  return clientDB.transact(clientDB.tx.drawings[drawingId].merge({ state }));
 }
 
 export function updateDrawingName({
@@ -116,9 +116,9 @@ export function updateDrawingName({
   drawingId: string;
   name: string;
 }) {
-  return db.transact(tx.drawings[drawingId].merge({ name }));
+  return clientDB.transact(clientDB.tx.drawings[drawingId].merge({ name }));
 }
 
 export function deleteDrawing({ drawingId }: { drawingId: string }) {
-  return db.transact(tx.drawings[drawingId].delete());
+  return clientDB.transact(clientDB.tx.drawings[drawingId].delete());
 }

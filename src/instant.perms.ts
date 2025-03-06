@@ -1,4 +1,6 @@
-export default {
+import { InstantRules } from "@instantdb/react";
+
+const rules = {
   teams: {
     bind: [
       "isCreator",
@@ -52,4 +54,6 @@ export default {
       update: "false",
     },
   },
-};
+} satisfies InstantRules;
+
+export default rules;
