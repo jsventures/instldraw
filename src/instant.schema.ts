@@ -3,22 +3,17 @@ import { TLInstancePresence } from "tldraw";
 
 const schema = i.schema({
   entities: {
+    $users: i.entity({
+      email: i.string().unique().indexed(),
+    }),
     drawings: i.entity({
       name: i.string(),
       state: i.json(),
     }),
     invites: i.entity({
-      teamId: i.string(),
-      teamName: i.string(),
-      userEmail: i.string(),
-    }),
-    memberships: i.entity({
-      teamId: i.string(),
-      userEmail: i.string(),
-      userId: i.string(),
+      email: i.string().indexed(),
     }),
     teams: i.entity({
-      creatorId: i.string(),
       name: i.string(),
     }),
   },
@@ -27,7 +22,7 @@ const schema = i.schema({
       forward: {
         on: "drawings",
         has: "one",
-        label: "teams",
+        label: "team",
       },
       reverse: {
         on: "teams",
@@ -35,28 +30,40 @@ const schema = i.schema({
         label: "drawings",
       },
     },
-    invitesTeams: {
-      forward: {
-        on: "invites",
-        has: "one",
-        label: "teams",
-      },
+    teamInvites: {
       reverse: {
         on: "teams",
         has: "many",
         label: "invites",
       },
-    },
-    membershipsTeams: {
       forward: {
-        on: "memberships",
+        on: "invites",
         has: "one",
-        label: "teams",
+        label: "team",
       },
-      reverse: {
+    },
+    teamMembers: {
+      forward: {
         on: "teams",
         has: "many",
-        label: "memberships",
+        label: "members",
+      },
+      reverse: {
+        on: "$users",
+        has: "many",
+        label: "joinedTeams",
+      },
+    },
+    teamCreators: {
+      forward: {
+        on: "teams",
+        has: "one",
+        label: "creator",
+      },
+      reverse: {
+        on: "$users",
+        has: "many",
+        label: "createdTeams",
       },
     },
   },

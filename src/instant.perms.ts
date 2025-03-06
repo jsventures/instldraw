@@ -1,20 +1,30 @@
 import { InstantRules } from "@instantdb/react";
 
 const rules = {
+  // This is a production app -- by default we restrict everything
+  $default: {
+    allow: {
+      $default: "false",
+    },
+  },
+
   teams: {
     bind: [
       "isCreator",
-      "auth.id == data.creatorId",
+      "auth.id == data.ref('creator.id')",
       "isMember",
-      "auth.id in data.ref('memberships.userId')",
+      "auth.id in data.ref('members.id')",
+      "isPartOfTeam",
+      "isCreator || isMember",
     ],
     allow: {
-      view: "isMember",
-      create: "isCreator",
-      delete: "isCreator",
-      update: "isCreator",
+      // If you're part of the team, you can view the team
+      view: "isPartOfTeam",
+      // Only the creator can change the team
+      $default: "isCreator",
     },
   },
+
   invites: {
     bind: [
       "isMember",

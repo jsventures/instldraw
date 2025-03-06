@@ -47,16 +47,18 @@ function Index({ user }: { user: User }) {
     teams: {
       $: {
         where: {
-          "memberships.userId": user.id,
+          or: [{ member: user.id }, { creator: user.id }],
         },
       },
     },
+
     invites: {
       $: {
         where: {
           userEmail: user.email,
         },
       },
+      team: {},
     },
   });
 
