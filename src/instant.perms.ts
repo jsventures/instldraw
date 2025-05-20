@@ -2,12 +2,7 @@ import { InstantRules } from "@instantdb/react";
 
 const rules = {
   teams: {
-    bind: [
-      "isCreator",
-      "auth.id == data.creatorId",
-      "isMember",
-      "auth.id in data.ref('memberships.userId')",
-    ],
+    bind: ["isCreator", "auth.id == data.creatorId", "isMember", "auth.id in data.ref('memberships.userId')"],
     allow: {
       view: "isMember",
       create: "isCreator",
@@ -16,17 +11,12 @@ const rules = {
     },
   },
   invites: {
-    bind: [
-      "isMember",
-      "auth.id in data.ref('teams.memberships.userId')",
-      "isInvitee",
-      "auth.email == data.userEmail",
-    ],
+    bind: ["isMember", "auth.id in data.ref('teams.memberships.userId')", "isInvitee", "auth.email == data.userEmail"],
     allow: {
       view: "isInvitee",
       create: "isMember",
       delete: "isMember",
-      update: "false",
+      update: "isInvitee",
     },
   },
   drawings: {
@@ -42,16 +32,18 @@ const rules = {
     bind: [
       "isMember",
       "auth.id in data.ref('teams.memberships.userId')",
-      "isInviteeOrCreator",
-      "size(data.ref('teams.invites.id')) == 0 ? auth.id in data.ref('teams.creatorId') : auth.email in data.ref('teams.invites.userEmail')",
+      "isCreator",
+      "auth.id in data.ref('teams.creatorId')",
       "isUser",
       "auth.id == data.userId",
+      "isInvitee",
+      "auth.email in data.ref('teams.invites.userEmail')",
     ],
     allow: {
       view: "isMember",
-      create: "isInviteeOrCreator",
+      create: "isCreator",
       delete: "isUser",
-      update: "false",
+      update: "isInvitee",
     },
   },
 } satisfies InstantRules;
