@@ -2,13 +2,7 @@ import type { DrawingState } from "@/types";
 import { id } from "@instantdb/react";
 import clientDB from "@/lib/clientDB";
 
-export async function createDrawingForTeam({
-  teamId,
-  drawingName,
-}: {
-  teamId: string;
-  drawingName: string;
-}) {
+export async function createDrawingForTeam({ teamId, drawingName }: { teamId: string; drawingName: string }) {
   const drawingId = id();
 
   const result = await clientDB.transact([
@@ -57,32 +51,36 @@ export async function inviteMemberToTeam({
   teamName: string;
 }) {
   const inviteId = id();
+  const membershipId = id();
 
   const result = await clientDB.transact([
-    clientDB.tx.invites[inviteId].update({ userEmail, teamId, teamName }),
-    clientDB.tx.invites[inviteId].link({ teams: teamId }),
+    clientDB.tx.memberships[membershipId].update({
+      teamId,
+      userEmail,
+    }),
+    clientDB.tx.memberships[membershipId].link({ teams: teamId }),
+    clientDB.tx.invites[inviteId].update({ userEmail, teamId, teamName, membershipId }),
+    clientDB.tx.invites[inviteId].link({ teams: teamId, memberships: membershipId }),
   ]);
 
   return {
     result,
-    vars: { inviteId },
+    vars: { inviteId, membershipId },
   };
 }
 
 export async function acceptInvite({
-  teamId,
-  userEmail,
+  inviteId,
+  membershipId,
   userId,
 }: {
-  teamId: string;
-  userEmail: string;
+  inviteId: string;
+  membershipId: string;
   userId: string;
 }) {
-  const membershipId = id();
-
   const result = await clientDB.transact([
-    clientDB.tx.memberships[membershipId].update({ teamId, userId, userEmail }),
-    clientDB.tx.memberships[membershipId].link({ teams: teamId }),
+    clientDB.tx.memberships[membershipId].update({ userId }),
+    clientDB.tx.invites[inviteId].update({ status: "accepted" }),
   ]);
 
   return {
@@ -90,32 +88,18 @@ export async function acceptInvite({
   };
 }
 export async function declineInvite({ inviteId }: { inviteId: string }) {
-  const result = await clientDB.transact([
-    clientDB.tx.invites[inviteId].merge({ status: "declined" }),
-  ]);
+  const result = await clientDB.transact([clientDB.tx.invites[inviteId].merge({ status: "declined" })]);
 
   return {
     result,
   };
 }
 
-export function updateDrawingState({
-  drawingId,
-  state,
-}: {
-  drawingId: string;
-  state: DrawingState;
-}) {
+export function updateDrawingState({ drawingId, state }: { drawingId: string; state: DrawingState }) {
   return clientDB.transact(clientDB.tx.drawings[drawingId].merge({ state }));
 }
 
-export function updateDrawingName({
-  drawingId,
-  name,
-}: {
-  drawingId: string;
-  name: string;
-}) {
+export function updateDrawingName({ drawingId, name }: { drawingId: string; name: string }) {
   return clientDB.transact(clientDB.tx.drawings[drawingId].merge({ name }));
 }
 

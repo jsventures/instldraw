@@ -5,17 +5,19 @@ const schema = i.schema({
   entities: {
     drawings: i.entity({
       name: i.string(),
-      state: i.json(),
+      state: i.json().optional(),
     }),
     invites: i.entity({
       teamId: i.string(),
       teamName: i.string(),
       userEmail: i.string(),
+      status: i.string().optional(),
+      membershipId: i.string(),
     }),
     memberships: i.entity({
       teamId: i.string(),
       userEmail: i.string(),
-      userId: i.string(),
+      userId: i.string().optional(),
     }),
     teams: i.entity({
       creatorId: i.string(),
@@ -43,6 +45,18 @@ const schema = i.schema({
       },
       reverse: {
         on: "teams",
+        has: "many",
+        label: "invites",
+      },
+    },
+    invitesMemberships: {
+      forward: {
+        on: "invites",
+        has: "one",
+        label: "memberships",
+      },
+      reverse: {
+        on: "memberships",
         has: "many",
         label: "invites",
       },

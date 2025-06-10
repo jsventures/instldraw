@@ -63,14 +63,12 @@ function Index({ user }: { user: User }) {
   const { invites, teams } = result.data ?? {};
 
   const team = useMemo(() => {
-    return selectedTeamId
-      ? teams?.find((t) => t.id === selectedTeamId)
-      : undefined;
+    return selectedTeamId ? teams?.find((t) => t.id === selectedTeamId) : undefined;
   }, [selectedTeamId, teams]);
 
   const pendingInvites = useMemo(() => {
     const teamIds = new Set(teams?.map((t) => t.id) ?? []);
-    return invites?.filter((invite) => !teamIds.has(invite.teamId)) ?? [];
+    return invites?.filter((invite) => !teamIds.has(invite.teamId) && !invite.status) ?? [];
   }, [invites, teams]);
 
   useEffect(() => {
@@ -127,8 +125,8 @@ function Index({ user }: { user: User }) {
                       className="bg-black text-white py-0.5 px-3 rounded text-sm"
                       onClick={async () => {
                         acceptInvite({
-                          teamId: invite.teamId,
-                          userEmail: user.email,
+                          membershipId: invite.membershipId,
+                          inviteId: invite.id,
                           userId: user.id,
                         });
                       }}
@@ -342,11 +340,13 @@ function Team({
         </div>
         <div className="flex flex-col text-sm text-gray-600 bg-gray-50 rounded border py-2 px-3">
           <div className="font-bold">Members</div>
-          {memberships.map((m) => (
-            <div className="" key={m.id}>
-              {m.userEmail}
-            </div>
-          ))}
+          {memberships
+            .filter((m) => m.userId)
+            .map((m) => (
+              <div className="" key={m.id}>
+                {m.userEmail}
+              </div>
+            ))}
         </div>
       </div>
     </div>
